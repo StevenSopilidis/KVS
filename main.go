@@ -29,5 +29,5 @@ func main() {
 	addr := "127.0.0.1:8080"
 
 	log.Printf("Server starting listening at at address: %s", addr)
-	log.Fatal(http.ListenAndServe(addr, r))
+	log.Fatal(http.ListenAndServeTLS(addr, "cert.pem", "key.pem", r))
 }
