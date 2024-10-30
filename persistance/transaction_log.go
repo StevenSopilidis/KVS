@@ -42,7 +42,21 @@ type FileTransactionalLogger struct {
 	file         *os.File     // physical location of log
 }
 
-func NewFileTransactionLogger(filename string) (TransactionLogger, error) {
+// function accepts as parameter type of logger to create and the creates it
+// in case of file transaction logger filename must be set as an env param (TLOG_FILENAME)
+func NewTransactionLogger(logger string) (TransactionLogger, error) {
+	switch logger {
+	case "file":
+		return newTransactionFileLogger(os.Getenv("TLOG_FILENAME"))
+	case "":
+		return nil, fmt.Errorf("transaction logger type not defined")
+	default:
+		return nil, fmt.Errorf("no such transaction logger %s", logger)
+	}
+}
+
+// function for creating a file transaction logger
+func newTransactionFileLogger(filename string) (TransactionLogger, error) {
 	file, err := os.OpenFile(filename, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0755)
 	if err != nil {
 		return nil, fmt.Errorf("cannot open transaction log file: %w", err)

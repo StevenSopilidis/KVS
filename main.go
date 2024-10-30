@@ -2,32 +2,31 @@ package main
 
 import (
 	"log"
-	"net/http"
+	"os"
 
-	"github.com/StevenSopilidis/kvs/db"
+	"github.com/StevenSopilidis/kvs/core"
+	"github.com/StevenSopilidis/kvs/frontend"
 	"github.com/StevenSopilidis/kvs/persistance"
-	"github.com/gorilla/mux"
 )
 
 func main() {
-	// create file transactional logger
-	logger, err := persistance.NewFileTransactionLogger("test_log.log")
+	logger, err := persistance.NewTransactionLogger(os.Getenv("TLOG_TYPE"))
 	if err != nil {
 		log.Fatal("could not create file_transactional_logger: ", err)
 	}
 
-	server, err := db.NewServer(logger)
+	core, err := core.NewKeyValueStore(logger)
 	if err != nil {
-		log.Fatal("could not create server: ", err)
+		log.Fatal(err)
 	}
 
-	r := mux.NewRouter()
-	r.HandleFunc("/v1/{key}", server.KeyValuePutHandler).Methods("PUT")
-	r.HandleFunc("/v1/{key}", server.KeyValueGetHandler).Methods("GET")
-	r.HandleFunc("/v1/{key}", server.KeyValueDeleteHandler).Methods("DELETE")
+	f, err := frontend.NewFrontend(os.Getenv("FRONTEND_TYPE"))
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	addr := "127.0.0.1:8080"
-
-	log.Printf("Server starting listening at at address: %s", addr)
-	log.Fatal(http.ListenAndServeTLS(addr, "cert.pem", "key.pem", r))
+	err = f.Start(core)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

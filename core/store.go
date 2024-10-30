@@ -1,8 +1,8 @@
-package db
+package core
 
 import "sync"
 
-type Store struct {
+type store struct {
 	dataStore map[string]string
 	sync.RWMutex
 }
@@ -14,13 +14,13 @@ func (e *ErrNoSuckKey) Error() string {
 	return "no such key"
 }
 
-func NewStore() *Store {
-	return &Store{
+func newStore() *store {
+	return &store{
 		dataStore: make(map[string]string),
 	}
 }
 
-func (s *Store) Put(key, value string) error {
+func (s *store) put(key, value string) error {
 	s.Lock()
 	defer s.Unlock()
 	s.dataStore[key] = value
@@ -28,7 +28,7 @@ func (s *Store) Put(key, value string) error {
 	return nil
 }
 
-func (s *Store) Get(key string) (string, error) {
+func (s *store) get(key string) (string, error) {
 	s.RLock()
 	defer s.RUnlock()
 
@@ -41,7 +41,7 @@ func (s *Store) Get(key string) (string, error) {
 	return value, nil
 }
 
-func (s *Store) Delete(key string) error {
+func (s *store) delete(key string) error {
 	s.Lock()
 	defer s.Unlock()
 	delete(s.dataStore, key)
