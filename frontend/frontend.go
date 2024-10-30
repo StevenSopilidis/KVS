@@ -123,5 +123,5 @@ func (f *restFrontEnd) Start(kv *core.KeyValueStore) error {
 	addr := "127.0.0.1:8080"
 
 	log.Printf("Server starting listening at at address: %s", addr)
-	return http.ListenAndServe(addr, r)
+	return http.ListenAndServeTLS(addr, "../cert.pem", "../key.pem", r)
 }
